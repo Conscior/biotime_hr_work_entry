@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record model="ir.ui.view" id="hr_attendance_view_attendance_tree_inherit_biotime">
+        <field name="name">hr.attendance.tree</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.view_attendance_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='worked_hours']" position="after">
+                <!-- <field name="undertime" widget="float_time"/>
+                <field name="overtime" widget="float_time"/> -->
+                <button string="Confirmer temps sup" name="confirm_overtime" type="object" attrs="{'invisible': [('overtime', '=', 0)]}"/>
+                <button string="Validé" name="validate_attendance" type="object" attrs="{'invisible': [('overtime', '=', 0)]}"/>
+                <field name="state" widget="statusbar"/>
+            </xpath>
+
+            <xpath expr="/tree" position="attributes">
+                <attribute name="default_order">check_out desc</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

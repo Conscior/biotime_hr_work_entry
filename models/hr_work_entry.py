@@ -9,7 +9,6 @@ class HrWorkEntry(models.Model):
     _inherit = 'hr.work.entry'
 
     def sync_wrk_entries_biotime(self):
-        f = open('sync_wrk_entries_biotime.txt', 'w')
         from_date = self.env.context.get('default_date_start', False)
         end_date = self.env.context.get('default_date_end', False)
 
@@ -24,10 +23,9 @@ class HrWorkEntry(models.Model):
 
             atts = atts.filtered(
                 lambda rec: rec.check_in and rec.check_out and rec.check_in >= from_date and rec.check_out <= end_date)
-
         else:
             atts = self.env['hr.attendance'].search([])
-        f.write('atts : ' + str(atts) + '\n')
+
         for att in atts:
             local_att_check_in = pytz.utc.localize(att.check_in, is_dst=None).astimezone(
                 pytz.timezone(self.env.user.partner_id.tz or 'GMT'))
@@ -36,27 +34,35 @@ class HrWorkEntry(models.Model):
 
             shift_line = att.employee_id.biotime_shift_id.biotime_shift_lines.filtered(
                 lambda shift_line: int(shift_line.day_in) == local_att_check_in.weekday() and int(shift_line.day_out) == local_att_check_out.weekday())
-            
-            f.write('shift_line : ' + str(shift_line) + '\n')
 
             if shift_line and shift_line.ensure_one():
-                margin_check_in = (shift_line.check_in_end - shift_line.check_in_start)
-                margin_check_out = (shift_line.check_out_end - shift_line.check_out_start)
+                margin_check_in = (shift_line.check_in_end -
+                                   shift_line.check_in_start)
+                margin_check_out = (shift_line.check_out_end -
+                                    shift_line.check_out_start)
 
                 eq_wrk_entry = self.env['hr.work.entry'].search([
                     ('employee_id', '=', att.employee_id.id),
-                    ('date_start', '>=', att.check_in - timedelta(hours=margin_check_in)),
-                    ('date_stop', '<=', att.check_out + timedelta(hours=margin_check_out)),
+                    ('date_start', '>=', att.check_in -
+                     timedelta(hours=margin_check_in)),
+                    ('date_stop', '<=', att.check_out +
+                     timedelta(hours=margin_check_out)),
                     ('state', '=', 'draft')
                 ])
 
-                f.write('eq_wrk_entry : ' + str(eq_wrk_entry) + '\n')
-
-                for entry in eq_wrk_entry:
-                    work_entry_type_id = self.env['hr.work.entry.type'].search([('code', '=', 'WORK100')])
-                    entry.write({
-                        'name': str(work_entry_type_id.name) + ': ' + str(att.employee_id.name),
+                if eq_wrk_entry:
+                    work_entry_type_id = self.env['hr.work.entry.type'].search(
+                        [('code', '=', 'WORK100')])
+                    eq_wrk_entry[0].write({
+                        'name': str(work_entry_type_id.name) + ' : ' + str(att.employee_id.name),
+                        'date_start': att.check_in,
                         'work_entry_type_id': work_entry_type_id.id,
                         'state': 'validated'
                     })
-        f.close()
+                    eq_wrk_entry[-1].write({
+                        'name': str(work_entry_type_id.name) + ' : ' + str(att.employee_id.name),
+                        'work_entry_type_id': work_entry_type_id.id,
+                        # Allow user to aproove overtimes
+                        'date_end': att.check_out if not att.overtime else eq_wrk_entry[-1].date_end,
+                        'state': 'validated'
+                    })

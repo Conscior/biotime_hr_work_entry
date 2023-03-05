@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding='UTF-8'?>
+<odoo>
+
+    <data noupdate="1">
+        <!-- Timetable -->
+        <record id="resource.resource_calendar_std" model="resource.calendar">
+            <field name="att_timetable" eval="[(5, 0, 0),
+                    (0, 0, {'day': '6', 'check_in_start': 6, 'check_in_end': 10, 'check_out_start': 14, 'check_out_end': 18}),
+                    (0, 0, {'day': '0', 'check_in_start': 6, 'check_in_end': 10, 'check_out_start': 14, 'check_out_end': 18}),
+                    (0, 0, {'day': '1', 'check_in_start': 6, 'check_in_end': 10, 'check_out_start': 14, 'check_out_end': 18}),
+                    (0, 0, {'day': '2', 'check_in_start': 6, 'check_in_end': 10, 'check_out_start': 14, 'check_out_end': 18}),
+                    (0, 0, {'day': '3', 'check_in_start': 6, 'check_in_end': 10, 'check_out_start': 14, 'check_out_end': 18}),
+                ]" />
+        </record>
+
+    </data>
+
+</odoo>

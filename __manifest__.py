@@ -3,7 +3,7 @@
     'version': '15.0.0.0',
     'category': 'Generic Modules/Human Resources',
     'author': 'Ryad Abderrahim',
-    'depends': ['hr_biotime_attendance', 'hr_work_entry',],
+    'depends': ['biotime_hr_work_entry', 'hr_work_entry',],
     'data': [
         'data/download_data.xml',
 
